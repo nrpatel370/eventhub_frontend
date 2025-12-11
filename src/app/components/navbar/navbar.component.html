@@ -1,0 +1,41 @@
+<!-- src/app/components/navbar/navbar.component.html -->
+<mat-toolbar color="primary" class="navbar">
+  <div class="navbar-content">
+    <span class="logo" routerLink="/events">
+      <mat-icon>event</mat-icon>
+      EventHub
+    </span>
+    
+    <nav class="nav-links">
+      <a mat-button routerLink="/events" routerLinkActive="active">
+        <mat-icon>list</mat-icon>
+        Events
+      </a>
+      
+      <a mat-button routerLink="/create-event" routerLinkActive="active" *ngIf="authService.isAuthenticated">
+        <mat-icon>add_circle</mat-icon>
+        Create Event
+      </a>
+      
+      <a mat-button routerLink="/profile" routerLinkActive="active" *ngIf="authService.isAuthenticated">
+        <mat-icon>person</mat-icon>
+        Profile
+      </a>
+      
+      <a mat-button routerLink="/login" *ngIf="!authService.isAuthenticated">
+        <mat-icon>login</mat-icon>
+        Login
+      </a>
+      
+      <a mat-button routerLink="/register" *ngIf="!authService.isAuthenticated">
+        <mat-icon>person_add</mat-icon>
+        Register
+      </a>
+      
+      <button mat-button (click)="authService.logout()" *ngIf="authService.isAuthenticated">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </nav>
+  </div>
+</mat-toolbar>

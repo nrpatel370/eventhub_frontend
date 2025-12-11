@@ -1,0 +1,83 @@
+<!-- src/app/components/event-list/event-list.component.html -->
+<div class="event-list-container">
+  <div class="header">
+    <h1>Discover Local Events</h1>
+    <button mat-raised-button color="primary" routerLink="/create-event">
+      Create Event
+    </button>
+  </div>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search Events</mat-label>
+      <input matInput 
+             [(ngModel)]="searchKeyword" 
+             (keyup.enter)="searchEvents()"
+             placeholder="Search by title...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="category-field">
+      <mat-label>Category</mat-label>
+      <mat-select [(ngModel)]="selectedCategory" (selectionChange)="filterByCategory()">
+        <mat-option value="ALL">All Categories</mat-option>
+        <mat-option *ngFor="let category of categories" [value]="category">
+          {{ formatCategory(category) }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="events-grid" *ngIf="!loading">
+    <mat-card *ngFor="let event of filteredEvents" class="event-card">
+      <mat-card-header>
+        <mat-card-title>{{ event.title }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip>{{ formatCategory(event.category) }}</mat-chip>
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <p class="description">{{ event.description }}</p>
+        
+        <div class="event-details">
+          <div class="detail-item">
+            <mat-icon>location_on</mat-icon>
+            <span>{{ event.location }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <mat-icon>event</mat-icon>
+            <span>{{ formatDate(event.eventDate) }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="event.maxParticipants">
+            <mat-icon>people</mat-icon>
+            <span>Max: {{ event.maxParticipants }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+      
+      <mat-card-actions>
+        <button mat-button color="primary" [routerLink]="['/event', event.id]">
+          View Details
+        </button>
+        <button mat-button 
+                [color]="getUserRsvpStatus(event.id!) ? 'accent' : ''"
+                [routerLink]="['/event', event.id]">
+          <mat-icon *ngIf="getUserRsvpStatus(event.id!)">check_circle</mat-icon>
+          {{ getUserRsvpStatus(event.id!) ? 'RSVP\'d' : 'RSVP' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="loading-spinner" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div class="no-events" *ngIf="!loading && filteredEvents.length === 0">
+    <mat-icon>event_busy</mat-icon>
+    <p>No events found</p>
+  </div>
+</div>

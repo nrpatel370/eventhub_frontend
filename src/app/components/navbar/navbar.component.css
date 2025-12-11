@@ -1,0 +1,41 @@
+/* src/app/components/navbar/navbar.component.css */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.nav-links {
+  display: flex;
+  gap: 16px;
+}
+
+.nav-links a,
+.nav-links button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.active {
+  background-color: rgba(255, 255, 255, 0.1);
+}

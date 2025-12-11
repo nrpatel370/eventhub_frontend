@@ -1,0 +1,142 @@
+<!-- src/app/components/profile/profile.component.html -->
+<div class="profile-container" *ngIf="!loading && user">
+  
+  <!-- Profile Header -->
+  <mat-card class="profile-header">
+    <div id="profile-items">
+      <div class="profile-info">
+      <div class="avatar">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+      <div class="user-details">
+        <h1>{{ user.username }}</h1>
+        <p>{{ user.email }}</p>
+        <mat-chip>{{ user.role }}</mat-chip>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <button mat-stroked-button (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </div>
+    </div>
+  </mat-card>
+
+  <!-- Profile Tabs -->
+  <mat-card class="profile-content">
+    <mat-tab-group [(selectedIndex)]="activeTab">
+      
+      <!-- My Events Tab -->
+      <mat-tab label="My Events">
+        <div class="tab-content">
+          <div class="events-header">
+            <h2>Events I Created ({{ createdEvents.length }})</h2>
+            <button mat-raised-button color="primary" routerLink="/create-event">
+              <mat-icon>add</mat-icon>
+              Create New Event
+            </button>
+          </div>
+
+          <div class="events-grid" *ngIf="createdEvents.length > 0">
+            <mat-card *ngFor="let event of createdEvents" class="event-card">
+              <mat-card-header>
+                <mat-card-title>{{ event.title }}</mat-card-title>
+                <mat-card-subtitle>
+                  <mat-chip>{{ event.category }}</mat-chip>
+                </mat-card-subtitle>
+              </mat-card-header>
+              
+              <mat-card-content>
+                <div class="event-info">
+                  <div class="info-row">
+                    <mat-icon>event</mat-icon>
+                    <span>{{ formatDate(event.eventDate) }}</span>
+                  </div>
+                  <div class="info-row">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ event.location }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+              
+              <mat-card-actions>
+                <button mat-button color="primary" (click)="viewEvent(event.id!)">
+                  View Details
+                </button>
+                <button mat-button routerLink="/edit-event/{{event.id}}">
+                  Edit
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+
+          <div class="empty-state" *ngIf="createdEvents.length === 0">
+            <mat-icon>event_busy</mat-icon>
+            <p>You haven't created any events yet</p>
+            <button mat-raised-button color="primary" routerLink="/create-event">
+              Create Your First Event
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- RSVP'd Events Tab -->
+      <mat-tab label="My RSVPs">
+        <div class="tab-content">
+          <h2>Events I'm Attending ({{ rsvpEvents.length }})</h2>
+
+          <div class="events-grid" *ngIf="rsvpEvents.length > 0">
+            <mat-card *ngFor="let rsvp of rsvpEvents" class="event-card">
+              <mat-card-header>
+                <mat-card-title>{{ rsvp.event.title }}</mat-card-title>
+                <mat-card-subtitle>
+                  <mat-chip [color]="rsvp.status === 'GOING' ? 'primary' : 'accent'">
+                    {{ rsvp.status }}
+                  </mat-chip>
+                </mat-card-subtitle>
+              </mat-card-header>
+              
+              <mat-card-content>
+                <div class="event-info">
+                  <div class="info-row">
+                    <mat-icon>event</mat-icon>
+                    <span>{{ formatDate(rsvp.event.eventDate) }}</span>
+                  </div>
+                  <div class="info-row">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ rsvp.event.location }}</span>
+                  </div>
+                  <div class="info-row">
+                    <mat-icon>person</mat-icon>
+                    <span>Organized by {{ rsvp.event.organizer?.username }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+              
+              <mat-card-actions>
+                <button mat-button color="primary" (click)="viewEvent(rsvp.event.id!)">
+                  View Details
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+
+          <div class="empty-state" *ngIf="rsvpEvents.length === 0">
+            <mat-icon>event_available</mat-icon>
+            <p>You haven't RSVP'd to any events yet</p>
+            <button mat-raised-button color="primary" routerLink="/events">
+              Browse Events
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </mat-card>
+
+</div>
+
+<div class="loading-spinner" *ngIf="loading">
+  <mat-spinner></mat-spinner>
+</div>
