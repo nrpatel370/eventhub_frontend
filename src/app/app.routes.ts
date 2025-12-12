@@ -1,4 +1,3 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 
@@ -20,6 +19,12 @@ export const routes: Routes = [
   },
   {
     path: 'create-event',
+    loadComponent: () => import('./components/create-event/create-event.component')
+      .then(m => m.CreateEventComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'edit-event/:id',  // ← ADD THIS LINE
     loadComponent: () => import('./components/create-event/create-event.component')
       .then(m => m.CreateEventComponent),
     canActivate: [AuthGuard]

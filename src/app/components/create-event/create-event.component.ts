@@ -1,7 +1,7 @@
 // src/app/components/create-event/create-event.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,7 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { EventService } from '../../services/event.service';
 import { AuthService } from '../../services/auth.service';
-import { EventCategory } from '../../models/index.model';
+import { EventCategory, Event } from '../../models/index.model';
 
 @Component({
   selector: 'app-create-event',
@@ -38,12 +38,15 @@ export class CreateEventComponent implements OnInit {
   eventForm: FormGroup;
   categories = Object.values(EventCategory);
   minDate = new Date();
+  isEditMode = false;
+  eventId?: number;
   
   constructor(
     private fb: FormBuilder,
     private eventService: EventService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.eventForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
@@ -56,7 +59,41 @@ export class CreateEventComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    // Check if we're in edit mode
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.isEditMode = true;
+        this.eventId = +params['id'];
+        this.loadEventData(this.eventId);
+      }
+    });
+  }
+
+  loadEventData(eventId: number): void {
+    this.eventService.getEventById(eventId).subscribe({
+      next: (event: Event) => {
+        // Convert date to format needed for datepicker and time input
+        const eventDate = new Date(event.eventDate);
+        const timeString = eventDate.toTimeString().slice(0, 5); // HH:MM format
+        
+        this.eventForm.patchValue({
+          title: event.title,
+          description: event.description,
+          location: event.location,
+          eventDate: eventDate,
+          eventTime: timeString,
+          category: event.category,
+          maxParticipants: event.maxParticipants
+        });
+      },
+      error: (error: any) => {
+        console.error('Error loading event', error);
+        alert('Failed to load event');
+        this.router.navigate(['/events']);
+      }
+    });
+  }
 
   formatCategory(category: string): string {
     return category
@@ -75,31 +112,47 @@ export class CreateEventComponent implements OnInit {
       eventDate.setHours(parseInt(hours), parseInt(minutes));
       
       const eventData = {
-        ...formData,
-        eventDate: eventDate.toISOString(),
-        eventTime: undefined // Remove eventTime from payload
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        eventDate: eventDate,
+        category: formData.category,
+        maxParticipants: formData.maxParticipants || null
       };
-      
-      delete eventData.eventTime;
       
       const currentUser = this.authService.currentUserValue;
       if (!currentUser) {
         this.router.navigate(['/login']);
         return;
       }
-      
-      const organizerId = currentUser.userId;
-      
-      this.eventService.createEvent(eventData, organizerId).subscribe({
-        next: (response: any) => {
-          console.log('Event created successfully', response);
-          this.router.navigate(['/events']);
-        },
-        error: (error: any) => {
-          console.error('Error creating event', error);
-          alert('Failed to create event. Please try again.');
-        }
-      });
+
+      if (this.isEditMode && this.eventId) {
+        // Update existing event
+        this.eventService.updateEvent(this.eventId, eventData as Event).subscribe({
+          next: (response: any) => {
+            console.log('Event updated successfully', response);
+            this.router.navigate(['/event', this.eventId]);
+          },
+          error: (error: any) => {
+            console.error('Error updating event', error);
+            alert('Failed to update event. Please try again.');
+          }
+        });
+      } else {
+        // Create new event
+        const organizerId = currentUser.userId;
+        
+        this.eventService.createEvent(eventData as Event, organizerId).subscribe({
+          next: (response: any) => {
+            console.log('Event created successfully', response);
+            this.router.navigate(['/events']);
+          },
+          error: (error: any) => {
+            console.error('Error creating event', error);
+            alert('Failed to create event. Please try again.');
+          }
+        });
+      }
     } else {
       Object.keys(this.eventForm.controls).forEach(key => {
         this.eventForm.get(key)?.markAsTouched();
@@ -108,6 +161,10 @@ export class CreateEventComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/events']);
+    if (this.isEditMode && this.eventId) {
+      this.router.navigate(['/event', this.eventId]);
+    } else {
+      this.router.navigate(['/events']);
+    }
   }
 }
