@@ -8,7 +8,8 @@ import { Comment } from '../models/index.model';
   providedIn: 'root'
 })
 export class CommentService {
-  private apiUrl = 'http://localhost:8080/api/comments';
+  ROOT_URL = 'http://eventhub.us-east-1.elasticbeanstalk.com';
+  private apiUrl = this.ROOT_URL+'/api/comments';
 
   constructor(private http: HttpClient) { }
 

@@ -199,14 +199,19 @@ export class EventDetailComponent implements OnInit {
     }
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+  formatDate(date: string | Date): string {
+  if (!date) return '';
+
+  const d = typeof date === 'string' ? new Date(date) : date;
+
+  return d.toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+}
+
 }

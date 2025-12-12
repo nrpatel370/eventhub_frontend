@@ -8,7 +8,8 @@ import { User, Event, Rsvp } from '../models/index.model';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:8080/api/users';
+  ROOT_URL = 'http://eventhub.us-east-1.elasticbeanstalk.com';
+  private apiUrl = this.ROOT_URL + '/api/users';
 
   constructor(private http: HttpClient) { }
 

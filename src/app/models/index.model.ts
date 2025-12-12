@@ -22,7 +22,7 @@ export interface Event {
   title: string;
   description: string;
   location: string;
-  eventDate: Date;
+  eventDate: string;
   category: EventCategory;
   maxParticipants?: number;
   createdAt?: Date;

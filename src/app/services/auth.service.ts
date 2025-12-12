@@ -27,7 +27,8 @@ export interface RegisterRequest {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/auth';
+  ROOT_URL = 'http://eventhub.us-east-1.elasticbeanstalk.com';
+  private apiUrl = this.ROOT_URL+'/api/auth';
   private currentUserSubject: BehaviorSubject<AuthResponse | null>;
   public currentUser: Observable<AuthResponse | null>;
 
@@ -91,3 +92,4 @@ export class AuthService {
     return this.http.get<AuthResponse>(`${this.apiUrl}/validate`);
   }
 }
+

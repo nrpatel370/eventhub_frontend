@@ -71,29 +71,34 @@ export class CreateEventComponent implements OnInit {
   }
 
   loadEventData(eventId: number): void {
-    this.eventService.getEventById(eventId).subscribe({
-      next: (event: Event) => {
-        // Convert date to format needed for datepicker and time input
-        const eventDate = new Date(event.eventDate);
-        const timeString = eventDate.toTimeString().slice(0, 5); // HH:MM format
-        
-        this.eventForm.patchValue({
-          title: event.title,
-          description: event.description,
-          location: event.location,
-          eventDate: eventDate,
-          eventTime: timeString,
-          category: event.category,
-          maxParticipants: event.maxParticipants
-        });
-      },
-      error: (error: any) => {
-        console.error('Error loading event', error);
-        alert('Failed to load event');
-        this.router.navigate(['/events']);
-      }
-    });
-  }
+  this.eventService.getEventById(eventId).subscribe({
+    next: (event: Event) => {
+      const [datePart, timePart] = event.eventDate.split('T');
+
+      const [year, month, day] = datePart.split('-').map(Number);
+      const dateForPicker = new Date(year, month - 1, day);
+
+      const [h, m] = timePart.split(':');
+      const timeString = `${h}:${m}`; 
+
+      this.eventForm.patchValue({
+        title: event.title,
+        description: event.description,
+        location: event.location,
+        eventDate: dateForPicker,
+        eventTime: timeString,
+        category: event.category,
+        maxParticipants: event.maxParticipants
+      });
+    },
+    error: (error: any) => {
+      console.error('Error loading event', error);
+      alert('Failed to load event');
+      this.router.navigate(['/events']);
+    }
+  });
+}
+
 
   formatCategory(category: string): string {
     return category
@@ -104,18 +109,24 @@ export class CreateEventComponent implements OnInit {
 
   onSubmit(): void {
     if (this.eventForm.valid) {
-      const formData = this.eventForm.value;
-      
-      // Combine date and time
-      const eventDate = new Date(formData.eventDate);
-      const [hours, minutes] = formData.eventTime.split(':');
-      eventDate.setHours(parseInt(hours), parseInt(minutes));
+     const formData = this.eventForm.value;
+
+      const date: Date = formData.eventDate; // from MatDatepicker
+      const [hours, minutes] = (formData.eventTime as string).split(':').map(Number);
+
+      const yyyy = date.getFullYear();
+      const MM = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const HH = String(hours).padStart(2, '0');
+      const mm = String(minutes).padStart(2, '0');
+
+    const eventDateTime = `${yyyy}-${MM}-${dd}T${HH}:${mm}:00`;
       
       const eventData = {
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        eventDate: eventDate,
+        eventDate: eventDateTime,
         category: formData.category,
         maxParticipants: formData.maxParticipants || null
       };
